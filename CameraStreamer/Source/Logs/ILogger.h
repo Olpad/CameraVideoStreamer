@@ -22,35 +22,17 @@ public:
 	 */
 	virtual void WriteInfo(const std::string& msg) = 0;
 
-//	/**
-//	 * Logs a standard message containing information.
-//	 * @param[in] msg Message to write.
-//	 */
-//	virtual void WriteInfo(const char* msg) = 0;
-
 	/**
 	 * Logs a standard message containing warning.
 	 * @param[in] msg Message to write.
 	 */
 	virtual void WriteWarning(const std::string& msg) = 0;
 
-//	/**
-//	 * Logs a standard message containing warning.
-//	 * @param[in] msg Message to write.
-//	 */
-//	virtual void WriteWarning(const char* msg) = 0;
-
 	/**
 	 * Logs a standard message containing error.
 	 * @param[in] msg Message to write.
 	 */
 	virtual void WriteError(const std::string& msg) = 0;
-
-//	/**
-//	 * Logs a standard message containing error.
-//	 * @param[in] msg Message to write.
-//	 */
-//	virtual void WriteError(const char* msg) = 0;
 
 	virtual ~ILogger() {}
 };

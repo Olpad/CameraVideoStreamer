@@ -29,15 +29,9 @@ public:
 
 	void WriteInfo(const std::string& msg) override;
 
-//	void WriteInfo(const char* msg) override;
-
 	void WriteWarning(const std::string& msg) override;
 
-//	void WriteWarning(const char* msg) override;
-
 	void WriteError(const std::string& msg) override;
-
-//	void WriteError(const char* msg) override;
 
 	virtual ~BasicTxtLogger();
 
@@ -50,7 +44,8 @@ private:
 	const std::string TEMPLATE_INFO = "[INFO] ";
 	const std::string TEMPLATE_WARNING = "[WARNING] ";
 	const std::string TEMPLATE_ERROR = "[ERROR] ";
-	const std::string TEMPLATE_LOG_EXTENSION = ".txt";
+	const std::string TEMPLATE_LOG_NAME_HEADER = "CSLog_";
+	const std::string TEMPLATE_LOG_NAME_EXTENSION = ".txt";
 
 	/**
 	 * @brief Loads configuration keys.
@@ -65,10 +60,10 @@ private:
 	void ValidateDirectory();
 
 	/**
-	 * @brief Read all logs and deletes excessive ones.
+	 * @brief Read all logs and deletes excessive amount.
 	 * @todo Implement validation
 	 */
-	void ValidateLogs();
+	void CleanLogs();
 
 	/**
 	 * @brief Creates a new log file in the given path.

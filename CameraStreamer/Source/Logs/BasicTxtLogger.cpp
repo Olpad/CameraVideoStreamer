@@ -5,7 +5,7 @@ void BasicTxtLogger::Initialize()
 {
 	LoadConfiguration();
 	ValidateDirectory();
-	ValidateLogs();
+	CleanLogs();
 	CreateNewLogFile();
 
 	WriteInfo("New log created.");
@@ -51,8 +51,9 @@ void BasicTxtLogger::ValidateDirectory()
 
 }
 
-void BasicTxtLogger::ValidateLogs()
+void BasicTxtLogger::CleanLogs()
 {
+
 }
 
 void BasicTxtLogger::CreateNewLogFile()
@@ -63,13 +64,14 @@ void BasicTxtLogger::CreateNewLogFile()
 	std::time(&rawTime);
 	timeInfo = std::localtime(&rawTime);
 
-	char timeBuffer[20];
-	std::strftime(timeBuffer, 20, "%Y.%m.%d-%H.%M.%S", timeInfo);
+	char timeBuffer[16];
+	std::strftime(timeBuffer, 16, "%Y%m%d_%H%M%S", timeInfo);
 
 	std::string path = m_dirPath
 			+ ((*m_dirPath.rbegin() == '/') ? "" : "/")
+			+ TEMPLATE_LOG_NAME_HEADER
 			+ timeBuffer
-			+ TEMPLATE_LOG_EXTENSION;
+			+ TEMPLATE_LOG_NAME_EXTENSION;
 
 	m_log.open(path.c_str(), std::ofstream::out | std::ofstream::trunc);
 
@@ -79,30 +81,15 @@ void BasicTxtLogger::CreateNewLogFile()
 	}
 }
 
-//void BasicTxtLogger::WriteInfo(const char* msg)
-//{
-//	m_log << TEMPLATE_INFO << msg << std::endl;
-//}
-
 void BasicTxtLogger::WriteInfo(const std::string& msg)
 {
 	m_log << TEMPLATE_INFO << msg << std::endl;
 }
 
-//void BasicTxtLogger::WriteWarning(const char* msg)
-//{
-//	m_log << TEMPLATE_WARNING << msg << std::endl;
-//}
-
 void BasicTxtLogger::WriteWarning(const std::string& msg)
 {
 	m_log << TEMPLATE_WARNING << msg << std::endl;
 }
-
-//void BasicTxtLogger::WriteError(const char* msg)
-//{
-//	m_log << TEMPLATE_ERROR << msg << std::endl;
-//}
 
 void BasicTxtLogger::WriteError(const std::string& msg)
 {

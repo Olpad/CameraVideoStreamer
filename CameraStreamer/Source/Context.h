@@ -19,11 +19,17 @@ struct Context
 
 	~Context()
 	{
-		if(ConfigurationReader != nullptr)
-			delete ConfigurationReader;
-
 		if(Logger != nullptr)
+		{
 			delete Logger;
+			Logger = nullptr;
+		}
+
+		if(ConfigurationReader != nullptr)
+		{
+			delete ConfigurationReader;
+			ConfigurationReader = nullptr;
+		}
 	}
 };
 
