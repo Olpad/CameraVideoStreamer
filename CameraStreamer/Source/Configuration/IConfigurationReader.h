@@ -7,8 +7,9 @@
 #define ICONFIGURATIONREADER_H_
 
 #include <string>
+#include "../ISystemService.h"
 
-class IConfigurationReader
+class IConfigurationReader : public ISystemService
 {
 public:
 	/**

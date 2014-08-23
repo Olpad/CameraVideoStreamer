@@ -9,7 +9,9 @@
 #include "Context.h"
 #include "./Configuration/BasicINIConfigReader.h"
 #include "./Logs/BasicTxtLogger.h"
+#include "./Devices/CameraHandler.h"
 #include <iostream>
+#include <gst/gst.h>
 
 class Application
 {
@@ -20,6 +22,8 @@ public:
 
 protected:
 	Context* m_context;
+
+	void PreInitializeApp();
 };
 
 #endif /* APPLICATION_H_ */

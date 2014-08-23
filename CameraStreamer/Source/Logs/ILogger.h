@@ -7,8 +7,9 @@
 #define ILOGGER_H_
 
 #include <string>
+#include "../ISystemService.h"
 
-class ILogger
+class ILogger : public ISystemService
 {
 public:
 	/*

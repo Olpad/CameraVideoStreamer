@@ -1,4 +1,5 @@
 #include "BasicINIConfigReader.h"
+#include "../Exceptions/ConfigRecordReadFailedException.h"
 
 BasicINIConfigReader::BasicINIConfigReader()
 {
@@ -32,7 +33,17 @@ void BasicINIConfigReader::Initialize()
 
 int BasicINIConfigReader::GetKeyIntValue(const std::string& sKeyName)
 {
-	return m_iniConfigData.get<int>(sKeyName);
+	int value;
+	try
+	{
+		value = m_iniConfigData.get<int>(sKeyName);
+	}
+	catch(...)
+	{
+		throw ConfigRecordReadFailedException(sKeyName);
+	}
+
+	return value;
 }
 
 int BasicINIConfigReader::TryGetKeyIntValue(const std::string& sKeyName)
@@ -49,7 +60,18 @@ int BasicINIConfigReader::TryGetKeyIntValue(const std::string& sKeyName)
 
 std::string BasicINIConfigReader::GetKeyStringValue(const std::string& sKeyName)
 {
-	return m_iniConfigData.get<std::string>(sKeyName);
+	std::string value;
+	try
+	{
+		std::cout << sKeyName << std::endl;
+		value = m_iniConfigData.get<std::string>(sKeyName);
+	}
+	catch(...)
+	{
+		throw ConfigRecordReadFailedException(sKeyName);
+	}
+
+	return value;
 }
 
 std::string BasicINIConfigReader::TryGetKeyStringValue(const std::string& sKeyName)

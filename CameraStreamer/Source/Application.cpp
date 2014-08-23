@@ -2,6 +2,8 @@
 
 Application::Application()
 {
+	PreInitializeApp();
+
 	m_context = new Context();
 	try
 	{
@@ -10,6 +12,9 @@ Application::Application()
 		m_context->Logger = new BasicTxtLogger(m_context);
 		m_context->Logger->Initialize();
 		m_context->Logger->WriteInfo("Late information: configuration loaded correctly.");
+		m_context->Logger->WriteInfo("Late information: logger initialized.");
+		CameraHandler cameraService(m_context);
+		cameraService.Initialize();
 	}
 	catch(...)
 	{
@@ -30,4 +35,9 @@ Application::~Application()
 	}
 
 	delete m_context;
+}
+
+void Application::PreInitializeApp()
+{
+   gst_init (0, 0);
 }

@@ -1,6 +1,6 @@
 /**
- * \struct Context
- * \brief Object storing all the main services necessary for frequent access.
+ * @struct Context
+ * @brief Object storing all the main services necessary for frequent access.
  */
 
 #ifndef CONTEXT_H_

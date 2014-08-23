@@ -15,6 +15,7 @@ public:
 	static const std::string SETUP_SECTION;
 	static const std::string PATH_TO_LOGS;
 	static const std::string MAX_NUMBER_OF_LOG_FILES;
+	static const std::string V4L_DIR_PATH;
 };
 
 #endif /* KNOWNCONFIGKEYES_H_ */
