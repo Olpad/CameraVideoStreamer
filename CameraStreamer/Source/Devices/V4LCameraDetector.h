@@ -52,9 +52,21 @@ protected:
 	std::map<CameraPath, CameraName> m_detectedCameras;
 	const std::string DEFAULT_V4L_PATH = "/sys/class/video4linux";
 
-	void DetermineCapabilities(GstElement* camera);
+	/* values below are set only once to make comparisons faster */
+	static GQuark m_format;
+	static GQuark m_width;
+	static GQuark m_height;
+	static GQuark m_pixel_aspect_ratio;
+	static GQuark m_interlance_mode;
+	static GQuark m_framerate;
 
-	static gboolean ForEachCapabilityParser(GQuark field, const GValue * value, gpointer pfx);
+	static GQuark m_videoXRaw;
+
+	void DetermineCapabilities(GstElement* camera, std::set<CameraCapsRecord>& capsSet);
+
+	bool IsAcceptableStructure(const GstStructure* structure) const;
+
+	static gboolean ForEachCapabilityParser(GQuark field, const GValue * value, gpointer capsRecord);
 };
 
 #endif /* CAMERADETECTOR_H_ */

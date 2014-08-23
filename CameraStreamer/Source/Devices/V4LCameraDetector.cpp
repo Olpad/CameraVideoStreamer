@@ -6,6 +6,22 @@
 #include "../Exceptions/ConfigRecordReadFailedException.h"
 #include "../Configuration/KnownConfigKeys.h"
 
+V4LCameraDetector::V4LCameraDetector(Context* context)
+{
+	m_context = context;
+
+	try
+	{
+		m_pathToV4lDir = m_context->ConfigurationReader->GetKeyStringValue(KnownConfigKeys::V4L_DIR_PATH);
+	}
+	catch(const ConfigRecordReadFailedException& ex)
+	{
+		std::string error = "In CameraDetector: " + std::string(ex.what()) + ". Using default path: " + DEFAULT_V4L_PATH;
+		m_context->Logger->WriteError(error);
+		m_pathToV4lDir = DEFAULT_V4L_PATH;
+	}
+}
+
 const std::map<CameraPath, CameraName>& V4LCameraDetector::DetectSystemCameras()
 {
 	using namespace boost::filesystem;
@@ -96,7 +112,7 @@ std::set<CameraCapsRecord> V4LCameraDetector::DetectCapabilities(
    }
 
    // get capabilities
-   DetermineCapabilities(camera);
+   DetermineCapabilities(camera, capsRecords);
 
    gst_element_set_state (pipeline, GST_STATE_NULL);
    gst_object_unref (pipeline);
@@ -104,7 +120,7 @@ std::set<CameraCapsRecord> V4LCameraDetector::DetectCapabilities(
    return capsRecords;
 }
 
-void V4LCameraDetector::DetermineCapabilities(GstElement* camera)
+void V4LCameraDetector::DetermineCapabilities(GstElement* camera, std::set<CameraCapsRecord>& capsSet)
 {
    // retrieve pad and caps
    GstPad* pad = gst_element_get_static_pad(camera, "src");
@@ -130,42 +146,96 @@ void V4LCameraDetector::DetermineCapabilities(GstElement* camera)
    GstStructure *structure = NULL;
    for(uint i=0; i < gst_caps_get_size(caps); ++i)
    {
+   	CameraCapsRecord capsRecord;
    	structure = gst_caps_get_structure(caps, i);
 
    	if(structure == NULL)
    		continue;
 
-   	gst_structure_foreach(structure, ForEachCapabilityParser, NULL);
+   	if(!IsAcceptableStructure(structure))
+   	{
+   		std::cout << "Skipping camera capability: " << gst_structure_get_name(structure) << std::endl;
+   		continue;
+   	}
+
+   	gst_structure_foreach(structure, ForEachCapabilityParser, &capsRecord);
+
+   	capsSet.insert(capsRecord);
    }
+}
+
+bool V4LCameraDetector::IsAcceptableStructure(const GstStructure* structure) const
+{
+	bool isAcceptable = (gst_structure_get_name_id(structure) != m_videoXRaw) ? true : false;
+
+	return isAcceptable;
+}
+
+gboolean V4LCameraDetector::ForEachCapabilityParser(GQuark field,
+	const GValue* value, gpointer capsRecordPtr)
+{
+	  const gchar *key = g_quark_to_string (field);
+	  const gchar *val = gst_value_serialize (value);
+
+	  CameraCapsRecord* capsRecord = (CameraCapsRecord*)capsRecordPtr;
+
+	  std::cout << "Parameter: " << key << " " << val << std::endl;
+
+	  if(field == m_format)
+	  {
+		  capsRecord->format = gst_value_serialize(value);
+		  return true;
+	  }
+
+	  if(field == m_width)
+	  {
+		  capsRecord->width = value->data->v_int;
+		  return true;
+	  }
+
+	  if(field == m_height)
+	  {
+		  capsRecord->height = value->data->v_int;
+		  return true;
+	  }
+
+	  if(field == m_pixel_aspect_ratio)
+	  {
+		  capsRecord->pixelAspectRatio = gst_value_serialize(value);
+		  return true;
+	  }
+
+	  if(field == m_interlance_mode)
+	  {
+		  // skip - unused value
+		  return true;
+	  }
+
+	  if(field == m_framerate)
+	  {
+		  for(unsigned int i=0; i < gst_value_list_get_size (value); ++i)
+		  {
+			  const GValue* fract = gst_value_list_get_value(value, i);
+			  const gchar* serializedFract = gst_value_serialize(fract);
+
+			  capsRecord->framerates.insert(serializedFract);
+		  }
+		  return true;
+	  }
+
+	  std::cout << "Unknown capability parameter." << std::endl;
+
+	  return true;
 }
 
 V4LCameraDetector::~V4LCameraDetector()
 {
 }
 
-V4LCameraDetector::V4LCameraDetector(Context* context)
-{
-	m_context = context;
-
-	try
-	{
-		m_pathToV4lDir = m_context->ConfigurationReader->GetKeyStringValue(KnownConfigKeys::V4L_DIR_PATH);
-	}
-	catch(const ConfigRecordReadFailedException& ex)
-	{
-		std::string error = "In CameraDetector: " + std::string(ex.what()) + ". Using default path: " + DEFAULT_V4L_PATH;
-		m_context->Logger->WriteError(error);
-		m_pathToV4lDir = DEFAULT_V4L_PATH;
-	}
-}
-
-gboolean V4LCameraDetector::ForEachCapabilityParser(GQuark field,
-	const GValue* value, gpointer pfx)
-{
-	  const gchar *val = gst_value_serialize (value);
-	  const gchar *key = g_quark_to_string (field);
-
-	  std::cout << (char*)value->data->v_pointer << " " << val << " " << key << std::endl;
-
-	  return true;
-}
+GQuark V4LCameraDetector::m_format = g_quark_from_static_string("format");
+GQuark V4LCameraDetector::m_width = g_quark_from_static_string("width");
+GQuark V4LCameraDetector::m_height = g_quark_from_static_string("height");
+GQuark V4LCameraDetector::m_pixel_aspect_ratio = g_quark_from_static_string("pixel-aspect-ratio");
+GQuark V4LCameraDetector::m_interlance_mode = g_quark_from_static_string("interlace-mode");
+GQuark V4LCameraDetector::m_framerate = g_quark_from_static_string("framerate");
+GQuark V4LCameraDetector::m_videoXRaw = g_quark_from_static_string("video/x-raw");

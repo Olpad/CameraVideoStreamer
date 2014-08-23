@@ -19,8 +19,8 @@ public:
 	unsigned short height;
 	unsigned short width;
 	std::string format;
-	float pixelAspectRatio;
-	std::set<float> framerates;
+	std::string pixelAspectRatio;
+	std::set<std::string> framerates;
 
 	bool operator<(const CameraCapsRecord& record) const
 	{
