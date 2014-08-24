@@ -15,14 +15,18 @@ void CameraHandler::Initialize()
 		throw NoCamerasDetectedException();
 	}
 
+	// process all available cameras
 	for(auto camera : availableCameras)
 	{
-		// todo create cameradevice
-		m_cameraDetector->DetectCapabilities(camera.first);
+		std::shared_ptr<V4LCameraDevice> newCamera = std::make_shared<V4LCameraDevice>(camera.second, camera.first, true);
+
+		auto capsSet = m_cameraDetector->DetectCapabilities(camera.first);
+		newCamera->AddCapabilities(capsSet);
+
+		m_cameraDevices.push_back(newCamera);
 	}
 }
 
 CameraHandler::~CameraHandler()
 {
-	// TODO Auto-generated destructor stub
 }

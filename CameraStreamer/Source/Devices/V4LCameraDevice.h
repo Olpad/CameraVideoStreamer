@@ -27,6 +27,8 @@ public:
 
 	void AddCapability(CameraCapsRecord& newCaps) override;
 
+	void AddCapabilities(std::set<CameraCapsRecord> capsSet);
+
 	virtual ~V4LCameraDevice();
 
 protected:

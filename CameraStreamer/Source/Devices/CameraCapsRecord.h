@@ -12,15 +12,17 @@
 
 #include <string>
 #include <set>
+#include <map>
 
-struct CameraCapsRecord
+typedef std::string VideoFormat;
+typedef std::set<std::string> AvailableFramerates;
+
+class CameraCapsRecord
 {
 public:
 	unsigned short height;
 	unsigned short width;
-	std::string format;
-	std::string pixelAspectRatio;
-	std::set<std::string> framerates;
+	std::map<VideoFormat, AvailableFramerates> videoFormats;
 
 	bool operator<(const CameraCapsRecord& record) const
 	{

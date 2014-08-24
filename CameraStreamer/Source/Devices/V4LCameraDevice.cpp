@@ -28,21 +28,12 @@ const std::set<CameraCapsRecord>& V4LCameraDevice::GetCapabilities() const
 
 void V4LCameraDevice::AddCapability(CameraCapsRecord& newCaps)
 {
-	auto it = m_capabilities.find(newCaps);
-	if(it == m_capabilities.end())
-	{
-		m_capabilities.insert(newCaps);
-		return;
-	}
+	m_capabilities.insert(newCaps);
+}
 
-	CameraCapsRecord c = *it;
-	m_capabilities.erase(it);
-	for(auto newFramerate : newCaps.framerates)
-	{
-		c.framerates.insert(newFramerate);
-	}
-
-	m_capabilities.insert(c);
+void V4LCameraDevice::AddCapabilities(std::set<CameraCapsRecord> capsSet)
+{
+	m_capabilities.insert(capsSet.begin(), capsSet.end());
 }
 
 V4LCameraDevice::~V4LCameraDevice()

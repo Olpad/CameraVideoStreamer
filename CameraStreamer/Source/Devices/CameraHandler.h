@@ -29,7 +29,7 @@ public:
 
 private:
 	Context* m_context;
-	std::list<ICameraDevice*> m_cameraDevices;
+	std::list<std::shared_ptr<ICameraDevice>> m_cameraDevices;
 	std::shared_ptr<ICameraDetector> m_cameraDetector;
 };
 

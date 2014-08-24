@@ -112,7 +112,8 @@ std::set<CameraCapsRecord> V4LCameraDetector::DetectCapabilities(
    }
 
    // get capabilities
-   DetermineCapabilities(camera, capsRecords);
+	m_context->Logger->WriteInfo("Processing camera under given path for available capabilities: " + systemPath);
+   FetchCapabilities(camera, capsRecords);
 
    gst_element_set_state (pipeline, GST_STATE_NULL);
    gst_object_unref (pipeline);
@@ -120,112 +121,142 @@ std::set<CameraCapsRecord> V4LCameraDetector::DetectCapabilities(
    return capsRecords;
 }
 
-void V4LCameraDetector::DetermineCapabilities(GstElement* camera, std::set<CameraCapsRecord>& capsSet)
+void V4LCameraDetector::FetchCapabilities(GstElement* camera, std::set<CameraCapsRecord>& capsSet)
 {
    // retrieve pad and caps
    GstPad* pad = gst_element_get_static_pad(camera, "src");
    GstCaps* caps = gst_pad_query_caps(pad, NULL);
 
-   // validate caps
-   if(caps == NULL)
-   {
-   	m_context->Logger->WriteError("CameraDetector::DetectCapabilities - Querying NULL camera capabilities.");
-   }
-
-   if(gst_caps_is_any(caps))
-   {
-   	m_context->Logger->WriteError("CameraDetector::DetectCapabilities - Found an error or a camera with ANY capabilities. The second is kind of unlikely.");
-   }
-
-   if(gst_caps_is_empty(caps))
-   {
-   	m_context->Logger->WriteError("CameraDetector::DetectCapabilities - Found a camera with EMPTY capabilities.");
-   }
+   if(!IsAValidCaps(caps))
+   	return;
 
    // parse all capabilities
    GstStructure *structure = NULL;
    for(uint i=0; i < gst_caps_get_size(caps); ++i)
    {
-   	CameraCapsRecord capsRecord;
    	structure = gst_caps_get_structure(caps, i);
-
-   	if(structure == NULL)
+   	if(!IsAValidStructure(structure))
    		continue;
 
-   	if(!IsAcceptableStructure(structure))
-   	{
-   		std::cout << "Skipping camera capability: " << gst_structure_get_name(structure) << std::endl;
-   		continue;
-   	}
-
-   	gst_structure_foreach(structure, ForEachCapabilityParser, &capsRecord);
-
-   	capsSet.insert(capsRecord);
+   	AddNewCapability(structure, capsSet);
    }
+
+   // write diagnostic information
+   CapabilitiesDetectionWorkLog(camera, capsSet);
 }
 
-bool V4LCameraDetector::IsAcceptableStructure(const GstStructure* structure) const
+bool V4LCameraDetector::IsAValidCaps(GstCaps* caps) const
 {
-	bool isAcceptable = (gst_structure_get_name_id(structure) != m_videoXRaw) ? true : false;
+	// validate caps
+   if(caps == NULL)
+   {
+   	m_context->Logger->WriteError("CameraDetector::DetectCapabilities - Querying NULL camera capabilities.");
+   	return false;
+   }
+
+   if(gst_caps_is_any(caps))
+   {
+   	m_context->Logger->WriteError("CameraDetector::DetectCapabilities - Found an error or a camera with ANY capabilities. The second is kind of unlikely.");
+   	return false;
+   }
+
+   if(gst_caps_is_empty(caps))
+   {
+   	m_context->Logger->WriteError("CameraDetector::DetectCapabilities - Found a camera with EMPTY capabilities.");
+   	return false;
+   }
+
+   return true;
+}
+
+bool V4LCameraDetector::IsAValidStructure(GstStructure* structure) const
+{
+	if(structure == NULL)
+	{
+   	m_context->Logger->WriteWarning("Camera capability structure is NULL!");
+		return false;
+	}
+
+	if(!IsSupportedStructureFormat(structure))
+	{
+   	m_context->Logger->WriteInfo("Skipping unsupported camera capability: " + std::string(gst_structure_get_name(structure)));
+		return false;
+	}
+
+	return true;
+}
+
+void V4LCameraDetector::AddNewCapability(GstStructure *structure, std::set<CameraCapsRecord>& capsSet)
+{
+	CameraCapsRecord capsRecord;
+
+	const GValue* framerates = gst_structure_id_get_value (structure, m_framerate);
+	if(!GST_VALUE_HOLDS_LIST(framerates) || gst_value_list_get_size (framerates) == 0)
+		return;
+
+	std::pair<VideoFormat, AvailableFramerates> newPair;
+	auto format = gst_structure_id_get_value (structure, m_format);
+	if(!G_IS_VALUE(format) && gst_structure_get_name_id(structure) == m_videoMPEG)
+		newPair.first = "MPEG";
+	else
+		newPair.first = gst_value_serialize(format);
+
+	capsRecord.height = gst_structure_id_get_value (structure, m_height)->data->v_int;
+	capsRecord.width = gst_structure_id_get_value (structure, m_width)->data->v_int;
+	auto it = capsSet.find(capsRecord);
+	if(it != capsSet.end())
+	{
+		capsRecord = *it;
+		capsSet.erase(it);
+	}
+
+	auto it2 = capsRecord.videoFormats.find(newPair.first);
+	if(it2 != capsRecord.videoFormats.end())
+	{
+		newPair = *it2;
+		capsRecord.videoFormats.erase(it2);
+	}
+
+	for(unsigned int i=0; i < gst_value_list_get_size (framerates); ++i)
+	{
+		const GValue* fract = gst_value_list_get_value(framerates, i);
+		const gchar* serializedFract = gst_value_serialize(fract);
+
+		newPair.second.insert(serializedFract);
+	}
+
+	capsRecord.videoFormats.insert(newPair);
+	capsSet.insert(capsRecord);
+}
+
+bool V4LCameraDetector::IsSupportedStructureFormat(const GstStructure* structure) const
+{
+	bool isAcceptable = (gst_structure_get_name_id(structure) == m_videoXRaw) ? true : false;
+	isAcceptable |= (gst_structure_get_name_id(structure) == m_videoMPEG) ? true : false;
 
 	return isAcceptable;
 }
 
-gboolean V4LCameraDetector::ForEachCapabilityParser(GQuark field,
-	const GValue* value, gpointer capsRecordPtr)
+void V4LCameraDetector::CapabilitiesDetectionWorkLog(const GstElement* camera, const std::set<CameraCapsRecord>& capsSet) const
 {
-	  const gchar *key = g_quark_to_string (field);
-	  const gchar *val = gst_value_serialize (value);
+	std::stringstream log;
+	log << "\tDetected following supported camera capabilities: \n";
 
-	  CameraCapsRecord* capsRecord = (CameraCapsRecord*)capsRecordPtr;
+	for(auto record : capsSet)
+	{
+		log << "\t Width: " << record.width << " Height: " << record.height << "\n";
+		for(auto format : record.videoFormats)
+		{
+			log << "\t  Format: " << format.first << " with framerates: ";
+			for(auto framerate : format.second)
+			{
+				log << framerate << " ";
+			}
+			log << "\n";
+		}
+	}
 
-	  std::cout << "Parameter: " << key << " " << val << std::endl;
-
-	  if(field == m_format)
-	  {
-		  capsRecord->format = gst_value_serialize(value);
-		  return true;
-	  }
-
-	  if(field == m_width)
-	  {
-		  capsRecord->width = value->data->v_int;
-		  return true;
-	  }
-
-	  if(field == m_height)
-	  {
-		  capsRecord->height = value->data->v_int;
-		  return true;
-	  }
-
-	  if(field == m_pixel_aspect_ratio)
-	  {
-		  capsRecord->pixelAspectRatio = gst_value_serialize(value);
-		  return true;
-	  }
-
-	  if(field == m_interlance_mode)
-	  {
-		  // skip - unused value
-		  return true;
-	  }
-
-	  if(field == m_framerate)
-	  {
-		  for(unsigned int i=0; i < gst_value_list_get_size (value); ++i)
-		  {
-			  const GValue* fract = gst_value_list_get_value(value, i);
-			  const gchar* serializedFract = gst_value_serialize(fract);
-
-			  capsRecord->framerates.insert(serializedFract);
-		  }
-		  return true;
-	  }
-
-	  std::cout << "Unknown capability parameter." << std::endl;
-
-	  return true;
+	m_context->Logger->WriteInfo(log.str());
 }
 
 V4LCameraDetector::~V4LCameraDetector()
@@ -239,3 +270,4 @@ GQuark V4LCameraDetector::m_pixel_aspect_ratio = g_quark_from_static_string("pix
 GQuark V4LCameraDetector::m_interlance_mode = g_quark_from_static_string("interlace-mode");
 GQuark V4LCameraDetector::m_framerate = g_quark_from_static_string("framerate");
 GQuark V4LCameraDetector::m_videoXRaw = g_quark_from_static_string("video/x-raw");
+GQuark V4LCameraDetector::m_videoMPEG = g_quark_from_static_string("image/jpeg");

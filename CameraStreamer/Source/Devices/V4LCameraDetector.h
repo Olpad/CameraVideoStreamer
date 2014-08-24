@@ -61,12 +61,50 @@ protected:
 	static GQuark m_framerate;
 
 	static GQuark m_videoXRaw;
+	static GQuark m_videoMPEG;
 
-	void DetermineCapabilities(GstElement* camera, std::set<CameraCapsRecord>& capsSet);
+	/**
+	 * @brief Organizes a sequence of actions for obtaining camera data.
+	 * @param[in] camera Camera in ready/pause/playing state.
+	 * @param[out] capsSet Empty set to fill with new capabilities.
+	 */
+	void FetchCapabilities(GstElement* camera, std::set<CameraCapsRecord>& capsSet);
 
-	bool IsAcceptableStructure(const GstStructure* structure) const;
+	/**
+	 * @brief Validates caps object. Logs errors.
+	 * @param[in] caps Caps object to validate.
+	 * @return True if caps object is valid.
+	 */
+	bool IsAValidCaps(GstCaps* caps) const;
 
-	static gboolean ForEachCapabilityParser(GQuark field, const GValue * value, gpointer capsRecord);
+	/**
+	 * @brief Validate structure object and formats. Logs errors.
+	 * @param[in] structure Structure to validate.
+	 * @return True if structure object is valid.
+	 */
+	bool IsAValidStructure(GstStructure *structure) const;
+
+	/**
+	 * @brief Scans structure for useful data and serializes it into a single
+	 *  CameraCapsRecord	structure.
+	 * @param[in] structure Structure containing parameters.
+	 * @param[out] capsSet Set of camera records to store new camera record into.
+	 */
+	void AddNewCapability(GstStructure *structure, std::set<CameraCapsRecord>& capsSet);
+
+	/**
+	 * @brief Checks if application is capable of supporting given format.
+	 * @param[in] structure Structure with format data.
+	 * @return True if data in a structure descibes a supported format.
+	 */
+	bool IsSupportedStructureFormat(const GstStructure* structure) const;
+
+	/**
+	 * @brief Logs results of the capability search.
+	 * @param[in] camera Camera which the search was performed for.
+	 * @param[in] capsSet Set of resulting records.
+	 */
+	void CapabilitiesDetectionWorkLog(const GstElement* camera, const std::set<CameraCapsRecord>& capsSet) const;
 };
 
 #endif /* CAMERADETECTOR_H_ */
