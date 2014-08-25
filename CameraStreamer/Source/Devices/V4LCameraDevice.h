@@ -11,19 +11,22 @@
 #define CAMERADEVICE_H_
 
 #include "ICameraDevice.h"
+#include "../StreamElements/StreamElement.h"
 
-class V4LCameraDevice : public ICameraDevice
+class V4LCameraDevice : public ICameraDevice, public StreamElement
 {
 public:
-	V4LCameraDevice(const std::string& deviceName, const std::string& systemPath, bool isAValidSource);
+	V4LCameraDevice(const std::string& deviceName, const std::string& systemPath);
 
 	const std::string& GetName() const override;
 
 	const std::string& GetSystemPath() const override;
 
-	bool IsAValidSource() const override;
-
 	const std::set<CameraCapsRecord>& GetCapabilities() const override;
+
+	StreamElementType GetType() const override;
+
+	bool IsAValidSource() const override;
 
 	void AddCapability(CameraCapsRecord& newCaps) override;
 
@@ -34,9 +37,10 @@ public:
 protected:
 	const std::string m_deviceName;
 	const std::string m_systemPath;
-	bool m_isValidSource;
-
+	StreamElementType m_type;
 	std::set<CameraCapsRecord> m_capabilities;
+
+	void InitializeValueTypes() override;
 };
 
 #endif /* CAMERADEVICE_H_ */

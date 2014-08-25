@@ -12,6 +12,7 @@
 #define CAMERADETECTOR_H_
 
 #include "ICameraDetector.h"
+#include "../Context.h"
 
 class V4LCameraDetector : public ICameraDetector
 {

@@ -10,11 +10,10 @@
 #ifndef ICAMERADETECTOR_H_
 #define ICAMERADETECTOR_H_
 
-#include <gst/gst.h>
-#include <iostream>
-#include "../Context.h"
 #include <map>
 #include <set>
+#include <iostream>
+#include <gst/gst.h>
 #include "CameraCapsRecord.h"
 
 typedef std::string CameraName,

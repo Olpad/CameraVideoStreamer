@@ -9,7 +9,7 @@
 #include "Context.h"
 #include "./Configuration/BasicINIConfigReader.h"
 #include "./Logs/BasicTxtLogger.h"
-#include "./Devices/CameraHandler.h"
+#include "./Devices/BasicCameraHandler.h"
 #include <iostream>
 #include <gst/gst.h>
 

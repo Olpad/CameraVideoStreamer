@@ -8,14 +8,16 @@
 
 #include "./Configuration/IConfigurationReader.h"
 #include "./Logs/ILogger.h"
+#include "./Devices/ICameraHandler.h"
 
 struct Context
 {
-	Context() : ConfigurationReader(nullptr), Logger(nullptr)
+	Context() : ConfigurationReader(nullptr), Logger(nullptr), CameraHandler(nullptr)
 	{	}
 
 	IConfigurationReader* ConfigurationReader;
 	ILogger* Logger;
+	ICameraHandler* CameraHandler;
 
 	~Context()
 	{
@@ -29,6 +31,12 @@ struct Context
 		{
 			delete ConfigurationReader;
 			ConfigurationReader = nullptr;
+		}
+
+		if(CameraHandler != nullptr)
+		{
+			delete CameraHandler;
+			CameraHandler = nullptr;
 		}
 	}
 };

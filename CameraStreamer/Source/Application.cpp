@@ -13,8 +13,9 @@ Application::Application()
 		m_context->Logger->Initialize();
 		m_context->Logger->WriteInfo("Late information: configuration loaded correctly.");
 		m_context->Logger->WriteInfo("Late information: logger initialized.");
-		CameraHandler cameraService(m_context);
-		cameraService.Initialize();
+		m_context->CameraHandler = new BasicCameraHandler(m_context);
+		m_context->CameraHandler->Initialize();
+		m_context->Logger->WriteInfo("Camera handler initialized.");
 	}
 	catch(...)
 	{
