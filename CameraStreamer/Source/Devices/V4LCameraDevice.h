@@ -11,7 +11,7 @@
 #define CAMERADEVICE_H_
 
 #include "ICameraDevice.h"
-#include "../StreamElements/StreamElement.h"
+#include "../MediaStream/StreamElement.h"
 
 class V4LCameraDevice : public ICameraDevice, public StreamElement
 {

@@ -15,7 +15,7 @@
 #include <map>
 #include "ICameraDetector.h"
 #include "../ISystemService.h"
-#include "../StreamElements/IStreamElement.h"
+#include "../MediaStream/IStreamElement.h"
 #include "../Exceptions/NoCamerasDetectedException.h"
 
 class ICameraHandler : public ISystemService

@@ -81,7 +81,9 @@ bool StreamElement::LinkElementUsingParameters(std::shared_ptr<IStreamElement> s
 		const std::map<std::string, std::string>& params)
 {
 	//element link/unlink operations depends on the common parent stream
-	if(m_parentStream == nullptr || sinkElement->GetStream() != m_parentStream)
+	//to set parameters the m_valueType map need to contain appropriate elements
+	if(m_parentStream == nullptr || sinkElement->GetStream() != m_parentStream
+			|| m_valueType.size() == 0)
 		return false;
 
 	//initialize value type map if its empty

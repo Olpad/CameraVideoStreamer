@@ -12,6 +12,7 @@
 #ifndef ISTREAMELEMENT_H_
 #define ISTREAMELEMENT_H_
 
+#include <map>
 #include <memory>
 #include "gst/gst.h"
 #include "StreamElementType.h"
