@@ -1,12 +1,3 @@
-/**
- * @class QueueElement.cpp
- * 
- * @brief 
- *
- * @date Aug 26, 2014
- * @author Aleksander Bulski
- */
-
 #include "QueueElement.h"
 
 QueueElement::QueueElement(const std::string& name) :

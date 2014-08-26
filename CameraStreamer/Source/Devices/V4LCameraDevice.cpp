@@ -49,4 +49,8 @@ V4LCameraDevice::~V4LCameraDevice()
 
 void V4LCameraDevice::InitializeValueTypes()
 {
+	m_valueType.insert(std::pair<std::string, GType>("width", G_TYPE_INT));
+	m_valueType.insert(std::pair<std::string, GType>("height", G_TYPE_INT));
+	m_valueType.insert(std::pair<std::string, GType>("framerate", GST_TYPE_FRACTION));
+	m_valueType.insert(std::pair<std::string, GType>("format", G_TYPE_STRING));
 }
