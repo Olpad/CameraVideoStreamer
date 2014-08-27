@@ -16,6 +16,19 @@ Application::Application()
 		m_context->CameraHandler = new BasicCameraHandler(m_context);
 		m_context->CameraHandler->Initialize();
 		m_context->Logger->WriteInfo("Camera handler initialized.");
+		m_context->StreamManager = new BasicStreamManager(m_context);
+		m_context->StreamManager->Initialize();
+
+		//test
+		bool result = m_context->StreamManager->SetStateOfStream(GST_STATE_PLAYING, "testStream");
+		if(result)
+		{
+			//simple time consuming loop
+			while(1)
+			{
+
+			}
+		}
 	}
 	catch(...)
 	{

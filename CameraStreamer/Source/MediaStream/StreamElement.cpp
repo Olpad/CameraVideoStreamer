@@ -46,9 +46,12 @@ bool StreamElement::AddToStream(GstBin* stream)
 	if(m_parentStream != nullptr)
 		return false;
 
-	gst_bin_add (stream, m_element);
+	bool result = gst_bin_add (stream, m_element);
 
-	return true;
+	if(result)
+		m_parentStream = stream;
+
+	return result;
 }
 
 bool StreamElement::RemoveFromStream()

@@ -32,7 +32,7 @@ std::shared_ptr<IStreamElement> BasicCameraHandler::GetCameraElement(
 {
 	for(auto camera : m_cameraDevices)
 	{
-		if(camera->GetName() == systemPath)
+		if(camera->GetName().compare(systemPath))
 		{
 			std::shared_ptr<IStreamElement> cameraElement = std::dynamic_pointer_cast<IStreamElement>(camera);
 			return cameraElement;

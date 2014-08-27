@@ -11,13 +11,15 @@
 #ifndef BASICMEDIASTREAM_H_
 #define BASICMEDIASTREAM_H_
 
-#include "MediaStream.h"
-#include "../Context.h"
+#include "../MediaStream.h"
+#include "../../Context.h"
+#include "../CommonElements/QueueElement.h"
+#include "../CommonElements/AutoVideoSinkElement.h"
 
-class BasicMediaStream: public MediaStream
+class BasicMediaStream : public MediaStream
 {
 public:
-	BasicMediaStream(unsigned int streamID, Context* context);
+	BasicMediaStream(const std::string& name, Context* context);
 
 	void Create();
 
@@ -25,6 +27,8 @@ public:
 
 protected:
 	Context* m_context;
+
+	int ProcessBusMessage(GstBus *bus, GstMessage *message, gpointer user_data) override;
 };
 
 #endif /* BASICMEDIASTREAM_H_ */

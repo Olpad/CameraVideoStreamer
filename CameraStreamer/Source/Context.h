@@ -9,15 +9,18 @@
 #include "./Configuration/IConfigurationReader.h"
 #include "./Logs/ILogger.h"
 #include "./Devices/ICameraHandler.h"
+#include "./MediaStream/IStreamManager.h"
 
 struct Context
 {
-	Context() : ConfigurationReader(nullptr), Logger(nullptr), CameraHandler(nullptr)
+	Context() : ConfigurationReader(nullptr), Logger(nullptr),
+			CameraHandler(nullptr), StreamManager(nullptr)
 	{	}
 
 	IConfigurationReader* ConfigurationReader;
 	ILogger* Logger;
 	ICameraHandler* CameraHandler;
+	IStreamManager* StreamManager;
 
 	~Context()
 	{
@@ -37,6 +40,12 @@ struct Context
 		{
 			delete CameraHandler;
 			CameraHandler = nullptr;
+		}
+
+		if(StreamManager != nullptr)
+		{
+			delete StreamManager;
+			StreamManager = nullptr;
 		}
 	}
 };

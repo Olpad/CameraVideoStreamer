@@ -6,12 +6,13 @@
 #ifndef APPLICATION_H_
 #define APPLICATION_H_
 
+#include <iostream>
+#include <gst/gst.h>
 #include "Context.h"
 #include "./Configuration/BasicINIConfigReader.h"
 #include "./Logs/BasicTxtLogger.h"
 #include "./Devices/BasicCameraHandler.h"
-#include <iostream>
-#include <gst/gst.h>
+#include "./MediaStream/BasicStreamManager.h"
 
 class Application
 {
