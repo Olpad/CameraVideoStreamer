@@ -34,6 +34,8 @@ public:
 
 	virtual bool RemoveFromStream() override;
 
+	virtual GType ValidateParameter(const std::string& paramName) override;
+
 	virtual ~StreamElement();
 
 protected:
@@ -45,6 +47,8 @@ protected:
 	 * Stores all acceptable parameters with their respectable types.
 	 */
 	std::map<std::string, GType> m_valueType;
+
+	void SetCapsValue(GstCaps* caps, GType type, const std::pair<std::string, std::string>& pair);
 
 	/**
 	 * @brief Template method to be called every time the object is constructed

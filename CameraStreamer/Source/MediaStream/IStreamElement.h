@@ -14,6 +14,7 @@
 
 #include <map>
 #include <memory>
+#include <climits>
 #include "gst/gst.h"
 #include "StreamElementType.h"
 #include "../Exceptions/StreamElementNotCreatedException.h"
@@ -78,6 +79,13 @@ public:
 	 * @return True if operation succeeded.
 	 */
 	virtual bool RemoveFromStream() = 0;
+
+	/**
+	 * @brief Checks if passed parameter is valid.
+	 * @param[in] paramName Parameter name.
+	 * @return Type of the parameter value if valid. ULong.max if invalid.
+	 */
+	virtual GType ValidateParameter(const std::string& paramName) = 0;
 
 	virtual ~IStreamElement() {}
 };

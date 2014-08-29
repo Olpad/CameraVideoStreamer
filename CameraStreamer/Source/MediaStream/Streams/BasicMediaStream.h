@@ -14,6 +14,7 @@
 #include "../MediaStream.h"
 #include "../../Context.h"
 #include "../CommonElements/QueueElement.h"
+#include "../CommonElements/DecodeBinElement.h"
 #include "../CommonElements/AutoVideoSinkElement.h"
 
 class BasicMediaStream : public MediaStream

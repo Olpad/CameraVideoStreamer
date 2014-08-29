@@ -7,7 +7,6 @@ QueueElement::QueueElement(const std::string& name) :
 
 QueueElement::~QueueElement()
 {
-	// TODO Auto-generated destructor stub
 }
 
 StreamElementType QueueElement::GetType() const

@@ -2,7 +2,8 @@
 
 Application::Application()
 {
-	PreInitializeApp();
+   gst_init (0, 0);
+	//PreInitializeApp();
 
 	m_context = new Context();
 	try
@@ -23,11 +24,8 @@ Application::Application()
 		bool result = m_context->StreamManager->SetStateOfStream(GST_STATE_PLAYING, "testStream");
 		if(result)
 		{
-			//simple time consuming loop
-			while(1)
-			{
-
-			}
+			GMainLoop *main_loop = g_main_loop_new (NULL, FALSE);
+			g_main_loop_run (main_loop);
 		}
 	}
 	catch(...)

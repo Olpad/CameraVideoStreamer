@@ -8,6 +8,7 @@
 
 #include <string>
 #include "../ISystemService.h"
+#include "KnownConfigKeys.h"
 
 class IConfigurationReader : public ISystemService
 {

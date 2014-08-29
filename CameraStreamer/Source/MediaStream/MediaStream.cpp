@@ -14,8 +14,8 @@ bool MediaStream::SetState(GstState newState)
 {
 	if(m_pipeline == nullptr)
 		return false;
-
-	return gst_element_set_state(m_pipeline, newState);
+	gst_element_set_state(m_pipeline, newState);
+	return true;
 }
 
 void MediaStream::Restart()
